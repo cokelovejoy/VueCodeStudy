@@ -75,7 +75,7 @@ Vue.prototype.$mount = function (
 // 获取el中的元素,并赋值给template
       template = getOuterHTML(el)
     }
-// 判断template存在
+// 判断template不为空
     if (template) {
 /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -84,6 +84,7 @@ Vue.prototype.$mount = function (
       }
 // 编译成render函数
 // 最终都是为了将template字符串转换成 render函数
+// 执行compileToFunctions()  返回 { render, staticRenderFns } render 是渲染函数 ，mountComponent()里面会用到
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
@@ -91,6 +92,7 @@ Vue.prototype.$mount = function (
         delimiters: options.delimiters,
         comments: options.comments
       }, this)
+      // 将render 函数 和 staticRenderFns 绑定到vm.$options上
       options.render = render
       options.staticRenderFns = staticRenderFns
 

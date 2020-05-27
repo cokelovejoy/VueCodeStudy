@@ -183,7 +183,6 @@ export function defineReactive (
     get: function reactiveGetter () {
       // getter 为undefined 将val 赋值给value
       const value = getter ? getter.call(obj) : val
-      console.log('Dep target', Dep.target)
       // 当有watcher访问该数据的时候
       // 全局变量Dep.target = 该watcher实例
       if (Dep.target) {

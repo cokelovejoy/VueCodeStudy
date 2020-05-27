@@ -45,11 +45,11 @@ export default class Watcher {
   value: any;
   // watcher 在vue2.x版本里面 是一个组件一个watcher.可能里面有一些watch选项.
   constructor (
-    vm: Component,
-    expOrFn: string | Function,    // 表达式
+    vm: Component,                 // 组件实例
+    expOrFn: string | Function,    // 表达式 $mount组件时 expOrFn 为 updateComponent函数 = () => {vm._update(vm._render(), hydrating)}
     cb: Function,
     options?: ?Object,
-    isRenderWatcher?: boolean
+    isRenderWatcher?: boolean      // true 表示是组件的watcher, false 表示是用户的watcher
   ) {
     this.vm = vm
     if (isRenderWatcher) {
@@ -73,13 +73,13 @@ export default class Watcher {
     this.deps = []
     this.newDeps = []          // 存储Dep实例
     this.depIds = new Set()   
-    this.newDepIds = new Set() // 通过set存储dep的id
+    this.newDepIds = new Set() // 通过set存储dep的id 存进newDepIds的id都是唯一的
     this.expression = process.env.NODE_ENV !== 'production'
       ? expOrFn.toString()
       : ''
     // parse expression for getter
     if (typeof expOrFn === 'function') {
-      // 赋值给 getter
+      // expOrFn 为函数 就赋值给 getter
       this.getter = expOrFn 
     } else {
       // expOrFn是 字符串 就解析之后再赋值给 getter
@@ -94,8 +94,7 @@ export default class Watcher {
         )
       }
     }
-    // 计算值
-    // this.get() 首次获取值，缓存原始值，触发get方法 observer中的响应式的get方法会触发收集依赖.
+    // 第一次创建组件时，就会为该组件创建一个Watcher实例 this.get()就会调用 ，然后将当前的watcher实例赋值给Dep类的静态属性target
     this.value = this.lazy
       ? undefined
       : this.get()
@@ -105,16 +104,16 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   // 求值，并重新收集依赖
+  // this.get() 首次获取值，缓存原始值，触发get方法 observer中的响应式的get方法会触发收集依赖.
   get () {
-    // get函数被调用时，Dep.target就变成了watcher实例了
-    // pushTarget() 会将当前watcher 赋值给Dep.target
+    // pushTarget(this) 会将当前watcher 赋值给Dep.target
     pushTarget(this)
     let value
     const vm = this.vm
     try {
-      // 执行赋值给 getter 的函数 ，其中使用了响应属性的值，就会跳到 defineReactive中的get函数中
-      // 就是将当前的wathcer记录到Dep实例的subs 数组中。
-      // 调用 vm 的getter 函数取值，赋值给 value
+      // 此时的getter函数就是： () => {vm._update(vm._render(), hydrating)} 用于更新组件, 先创建虚拟DOM，然后将虚拟DOM渲染为真实DOM
+      // 在渲染的过程中触发了 响应式中的 get 函数，从而建立起 dep和watcher 之间的联系.
+      // 在挂载组建时 执行这一行代码 value 为 undefined ，因为updateComponent函数没有返回值
       value = this.getter.call(vm, vm)
     } catch (e) {
       if (this.user) {
@@ -145,9 +144,10 @@ export default class Watcher {
     // 已经有了id 就不再添加依赖
     if (!this.newDepIds.has(id)) {
       this.newDepIds.add(id)
-      this.newDeps.push(dep)
+      this.newDeps.push(dep) // 保存dep 到newDeps
       if (!this.depIds.has(id)) {
-        dep.addSub(this)
+        dep.addSub(this)     // 添加当前watcher 到dep的subs数组
+        console.log('current dep', dep)
       }
     }
   }
@@ -178,7 +178,7 @@ export default class Watcher {
    * Subscriber interface.
    * Will be called when a dependency changes.
    */
-  // 注册接口，当依赖改变的时候被调用
+  // 注册接口，当数据改变的时候被调用
   update () {
     /* istanbul ignore else */
     if (this.lazy) {
@@ -235,7 +235,7 @@ export default class Watcher {
   /**
    * Depend on all deps collected by this watcher.
    */
-  // 依赖于watcher收集到的所有依赖
+  // watcher收集到的所有依赖
   depend () {
     let i = this.deps.length
     while (i--) {

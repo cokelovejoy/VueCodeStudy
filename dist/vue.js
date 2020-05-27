@@ -1074,7 +1074,6 @@
       get: function reactiveGetter () {
         // getter 为undefined 将val 赋值给value
         var value = getter ? getter.call(obj) : val;
-        console.log('Dep target', Dep.target);
         // 当有watcher访问该数据的时候
         // 全局变量Dep.target = 该watcher实例
         if (Dep.target) {
@@ -3623,6 +3622,7 @@
         // separately from one another. Nested component's render fns are called
         // when parent component is patched.
         currentRenderingInstance = vm;
+        // render函数调用的时候会去获取已经绑定响应式的数据，调用get函数就会触发dep 和watcher 之间的相互绑定 
         vnode = render.call(vm._renderProxy, vm.$createElement);
       } catch (e) {
         handleError(e, vm, "render");
@@ -4015,13 +4015,13 @@
       vm._vnode = vnode;
       // Vue.prototype.__patch__ is injected in entry points
       // based on the rendering backend used.
-      // __patch__ 是一开始注入的
+      // __patch__ 是在入口注入的
       if (!prevVnode) {
-        // initial render
+        // initial render 第一次渲染
         // 初始化render
         vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */);
       } else {
-        // updates
+        // updates 之后的 每次渲染 都是更新
         vm.$el = vm.__patch__(prevVnode, vnode);
       }
       restoreActiveInstance();
@@ -4140,7 +4140,7 @@
       };
     } else {
       // 定义组件更新函数
-      // _render()执行可以获得虚拟DOM,VNode
+      // _render()执行可以产生 虚拟DOM,VNode
       // _update()将虚拟DOM转换成真实DOM
       updateComponent = function () {
         vm._update(vm._render(), hydrating);
@@ -4150,10 +4150,11 @@
     // we set this to vm._watcher inside the watcher's constructor
     // since the watcher's initial patch may call $forceUpdate (e.g. inside child
     // component's mounted hook), which relies on vm._watcher being already defined
-    // 挂载组建的时候就会 给当前组件 vm 创建 Watcher 实例
+    // 挂载组件的时候就会 给当前组件 vm 创建 Watcher 实例
 
     new Watcher(vm, updateComponent, noop, {
       before: function before () {
+        // 如果已经挂载并且没有被销毁 表示是 更新操作
         if (vm._isMounted && !vm._isDestroyed) {
           callHook(vm, 'beforeUpdate');
         }
@@ -4502,11 +4503,11 @@
   // 一个Watch解析表达式，收集依赖，当表达式的值发生变化的时候出发回调
   // $watch()的api方法和指令都会使用到它
   var Watcher = function Watcher (
-    vm,
-    expOrFn,  // 表达式
+    vm,               // 组件实例
+    expOrFn,  // 表达式 $mount组件时 expOrFn 为 updateComponent函数 = () => {vm._update(vm._render(), hydrating)}
     cb,
     options,
-    isRenderWatcher
+    isRenderWatcher    // true 表示是组件的watcher, false 表示是用户的watcher
   ) {
     this.vm = vm;
     if (isRenderWatcher) {
@@ -4530,12 +4531,12 @@
     this.deps = [];
     this.newDeps = [];        // 存储Dep实例
     this.depIds = new _Set();   
-    this.newDepIds = new _Set(); // 通过set存储dep的id
+    this.newDepIds = new _Set(); // 通过set存储dep的id 存进newDepIds的id都是唯一的
     this.expression =  expOrFn.toString()
       ;
     // parse expression for getter
     if (typeof expOrFn === 'function') {
-      // 赋值给 getter
+      // expOrFn 为函数 就赋值给 getter
       this.getter = expOrFn; 
     } else {
       // expOrFn是 字符串 就解析之后再赋值给 getter
@@ -4550,8 +4551,7 @@
         );
       }
     }
-    // 计算值
-    // this.get() 首次获取值，缓存原始值，触发get方法 observer中的响应式的get方法会触发收集依赖.
+    // 第一次创建组件时，就会为该组件创建一个Watcher实例 this.get()就会调用 ，然后将当前的watcher实例赋值给Dep类的静态属性target
     this.value = this.lazy
       ? undefined
       : this.get();
@@ -4561,16 +4561,16 @@
    * Evaluate the getter, and re-collect dependencies.
    */
   // 求值，并重新收集依赖
+  // this.get() 首次获取值，缓存原始值，触发get方法 observer中的响应式的get方法会触发收集依赖.
   Watcher.prototype.get = function get () {
-    // get函数被调用时，Dep.target就变成了watcher实例了
-    // pushTarget() 会将当前watcher 赋值给Dep.target
+    // pushTarget(this) 会将当前watcher 赋值给Dep.target
     pushTarget(this);
     var value;
     var vm = this.vm;
     try {
-      // 执行赋值给 getter 的函数 ，其中使用了响应属性的值，就会跳到 defineReactive中的get函数中
-      // 就是将当前的wathcer记录到Dep实例的subs 数组中。
-      // 调用 vm 的getter 函数取值，赋值给 value
+      // 此时的getter函数就是： () => {vm._update(vm._render(), hydrating)} 用于更新组件, 先创建虚拟DOM，然后将虚拟DOM渲染为真实DOM
+      // 在渲染的过程中触发了 响应式中的 get 函数，从而建立起 dep和watcher 之间的联系.
+      // 在挂载组建时 执行这一行代码 value 为 undefined ，因为updateComponent函数没有返回值
       value = this.getter.call(vm, vm);
     } catch (e) {
       if (this.user) {
@@ -4601,9 +4601,10 @@
     // 已经有了id 就不再添加依赖
     if (!this.newDepIds.has(id)) {
       this.newDepIds.add(id);
-      this.newDeps.push(dep);
+      this.newDeps.push(dep); // 保存dep 到newDeps
       if (!this.depIds.has(id)) {
-        dep.addSub(this);
+        dep.addSub(this);   // 添加当前watcher 到dep的subs数组
+        console.log('current dep', dep);
       }
     }
   };
@@ -4634,7 +4635,7 @@
    * Subscriber interface.
    * Will be called when a dependency changes.
    */
-  // 注册接口，当依赖改变的时候被调用
+  // 注册接口，当数据改变的时候被调用
   Watcher.prototype.update = function update () {
     /* istanbul ignore else */
     if (this.lazy) {
@@ -4691,7 +4692,7 @@
   /**
    * Depend on all deps collected by this watcher.
    */
-  // 依赖于watcher收集到的所有依赖
+  // watcher收集到的所有依赖
   Watcher.prototype.depend = function depend () {
     var i = this.deps.length;
     while (i--) {
@@ -4743,7 +4744,6 @@
   function initState (vm) {
     vm._watchers = [];
     var opts = vm.$options;
-    console.log('vm.$options', opts);
     if (opts.props) { initProps(vm, opts.props); }
     if (opts.methods) { initMethods(vm, opts.methods); }
     // data 处理
@@ -5126,7 +5126,7 @@
       initInjections(vm);// resolve injections before data/props 获取注入的数据(父组件的)
       initState(vm);     // 初始化组件中的 props,methods,data,computed, watch(自己的)
       initProvide(vm);   // resolve provide after data/props 提供数据
-      callHook(vm, 'created'); // 要拿到state 至少要在created 钩子函数中.
+      callHook(vm, 'created'); // 要拿到state 最早也要在created 钩子函数中.
 
       /* istanbul ignore if */
       if ( config.performance && mark) {
@@ -5134,8 +5134,9 @@
         mark(endTag);
         measure(("vue " + (vm._name) + " init"), startTag, endTag);
       }
-      // 如果有el选项 ,就执行$mount
+      // 如果有el选项, 就执行$mount 在此执行挂载
       if (vm.$options.el) {
+        console.log('11111111111111');
         vm.$mount(vm.$options.el);
       }
     };
@@ -5204,7 +5205,6 @@
   // 定义构造函数 Vue
   // 传入的options 就是new Vue({...})中的对象
   function Vue (options) {
-    console.log('options', options);
     if (
       !(this instanceof Vue)
     ) {
@@ -5214,11 +5214,11 @@
     this._init(options);
   }
 
-  initMixin(Vue);   // 实现了 _init()
+  initMixin(Vue);   // 混入init函数 实现了 _init()
   stateMixin(Vue);  // 状态相关: $data, $props, $set, $delete, $watch
   eventsMixin(Vue);  // 事件相关: $on, $emit, $once, $off
-  lifecycleMixin(Vue); // 生命周期相关: __update, $forceUpdate, $destroy
-  renderMixin(Vue);    // 渲染DOM相关: $nextTick, __render
+  lifecycleMixin(Vue); // 生命周期相关: _update, $forceUpdate, $destroy
+  renderMixin(Vue);    // 渲染DOM相关: $nextTick, _render
 
   /*  */
 
@@ -6639,7 +6639,7 @@
         return node.nodeType === (vnode.isComment ? 8 : 3)
       }
     }
-
+    // 返回的这个 patch函数 就是 vm.__patch__ 函数
     return function patch (oldVnode, vnode, hydrating, removeOnly) {
       // 新的节点不存在, 删
       if (isUndef(vnode)) {
@@ -11845,6 +11845,8 @@
 
   /*  */
 
+  // render 函数
+  // staticRenderFns
 
 
   function createFunction (code, errors) {
@@ -11958,6 +11960,8 @@
 
   /*  */
 
+
+  // createCompileToFunctionFn 返回的是 compileToFunctions函数
   function createCompilerCreator (baseCompile) {
     return function createCompiler (baseOptions) {
       function compile (
@@ -12020,7 +12024,7 @@
         compiled.tips = tips;
         return compiled
       }
-
+      // 返回compile函数
       return {
         compile: compile,
         compileToFunctions: createCompileToFunctionFn(compile)
@@ -12054,7 +12058,11 @@
   });
 
   /*  */
-
+  // createCompiler(baseOptions) 的返回值
+  // {
+  //     compile,
+  //     compileToFunctions: createCompileToFunctionFn(compile)
+  //  }
   var ref$1 = createCompiler(baseOptions);
   var compileToFunctions = ref$1.compileToFunctions;
 
@@ -12141,7 +12149,7 @@
   // 获取el中的元素,并赋值给template
         template = getOuterHTML(el);
       }
-  // 判断template存在
+  // 判断template不为空
       if (template) {
   /* istanbul ignore if */
         if ( config.performance && mark) {
@@ -12150,6 +12158,7 @@
         }
   // 编译成render函数
   // 最终都是为了将template字符串转换成 render函数
+  // 执行compileToFunctions()  返回 { render, staticRenderFns } render 是渲染函数 ，mountComponent()里面会用到
         var ref = compileToFunctions(template, {
           outputSourceRange: "development" !== 'production',
           shouldDecodeNewlines: shouldDecodeNewlines,
@@ -12159,6 +12168,7 @@
         }, this);
         var render = ref.render;
         var staticRenderFns = ref.staticRenderFns;
+        // 将render 函数 和 staticRenderFns 绑定到vm.$options上
         options.render = render;
         options.staticRenderFns = staticRenderFns;
 

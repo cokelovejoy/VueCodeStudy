@@ -63,7 +63,7 @@ export function initMixin (Vue: Class<Component>) {
     initInjections(vm)// resolve injections before data/props 获取注入的数据(父组件的)
     initState(vm)     // 初始化组件中的 props,methods,data,computed, watch(自己的)
     initProvide(vm)   // resolve provide after data/props 提供数据
-    callHook(vm, 'created') // 要拿到state 至少要在created 钩子函数中.
+    callHook(vm, 'created') // 要使用data中的数据 最早也只能在created 钩子函数中.
 
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -71,7 +71,7 @@ export function initMixin (Vue: Class<Component>) {
       mark(endTag)
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
-    // 如果有el选项 ,就执行$mount
+    // 如果有el选项, 就执行$mount 在此执行挂载
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }

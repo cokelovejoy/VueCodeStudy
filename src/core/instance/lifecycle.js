@@ -37,7 +37,7 @@ export function initLifecycle (vm: Component) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
-    // 把当前组件实例加入到父组件中
+    //  如果父组件存在, 把当前组件实例加入到父组件de $children中
     parent.$children.push(vm)
   }
 
@@ -63,13 +63,13 @@ export function lifecycleMixin (Vue: Class<Component>) {
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
-    // __patch__ 是一开始注入的
+    // __patch__ 是在入口注入的
     if (!prevVnode) {
-      // initial render
+      // initial render 第一次渲染
       // 初始化render
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
-      // updates
+      // updates 之后的 每次渲染 都是更新
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     restoreActiveInstance()
@@ -188,7 +188,7 @@ export function mountComponent (
     }
   } else {
     // 定义组件更新函数
-    // _render()执行可以获得虚拟DOM,VNode
+    // _render()执行可以产生 虚拟DOM,VNode
     // _update()将虚拟DOM转换成真实DOM
     updateComponent = () => {
       vm._update(vm._render(), hydrating)
@@ -198,10 +198,11 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
-  // 挂载组建的时候就会 给当前组件 vm 创建 Watcher 实例
+  // 挂载组件的时候就会 给当前组件 vm 创建 Watcher 实例
 
   new Watcher(vm, updateComponent, noop, {
     before () {
+      // 如果已经挂载并且没有被销毁 表示是 更新操作
       if (vm._isMounted && !vm._isDestroyed) {
         callHook(vm, 'beforeUpdate')
       }

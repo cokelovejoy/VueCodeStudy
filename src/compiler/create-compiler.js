@@ -4,6 +4,8 @@ import { extend } from 'shared/util'
 import { detectErrors } from './error-detector'
 import { createCompileToFunctionFn } from './to-function'
 
+
+// createCompileToFunctionFn 返回的是 compileToFunctions函数
 export function createCompilerCreator (baseCompile: Function): Function {
   return function createCompiler (baseOptions: CompilerOptions) {
     function compile (
@@ -66,7 +68,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
       compiled.tips = tips
       return compiled
     }
-
+    // 返回compile函数
     return {
       compile,
       compileToFunctions: createCompileToFunctionFn(compile)

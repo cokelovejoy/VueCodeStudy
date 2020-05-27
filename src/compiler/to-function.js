@@ -4,6 +4,8 @@ import { noop, extend } from 'shared/util'
 import { warn as baseWarn, tip } from 'core/util/debug'
 import { generateCodeFrame } from './codeframe'
 
+// render 函数
+// staticRenderFns
 type CompiledFunctionResult = {
   render: Function;
   staticRenderFns: Array<Function>;

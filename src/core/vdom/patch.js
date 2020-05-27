@@ -9,7 +9,7 @@
  * Not type-checking this because this file is perf-critical and the cost
  * of making flow understand it is not worth it.
  */
-
+// 虚拟DOM patch 算法
 import VNode, { cloneVNode } from './vnode'
 import config from '../config'
 import { SSR_ATTR } from 'shared/constants'
@@ -716,7 +716,7 @@ export function createPatchFunction (backend) {
       return node.nodeType === (vnode.isComment ? 8 : 3)
     }
   }
-
+  // 返回的这个 patch函数 就是 vm.__patch__ 函数
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
     // 新的节点不存在, 删
     if (isUndef(vnode)) {
