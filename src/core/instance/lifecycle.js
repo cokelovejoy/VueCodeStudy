@@ -189,7 +189,7 @@ export function mountComponent (
   } else {
     // 定义组件更新函数
     // _render()执行可以产生 虚拟DOM,VNode
-    // _update()将虚拟DOM转换成真实DOM
+    // _update()去做更新触发__patch__方法，将虚拟DOM转换成真实DOM
     updateComponent = () => {
       vm._update(vm._render(), hydrating)
     }
@@ -199,7 +199,7 @@ export function mountComponent (
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
   // 挂载组件的时候就会 给当前组件 vm 创建 Watcher 实例
-
+  // Watcher里面的任何一个dep发生了改变，就会执行updateComponent函数一次。
   new Watcher(vm, updateComponent, noop, {
     before () {
       // 如果已经挂载并且没有被销毁 表示是 更新操作

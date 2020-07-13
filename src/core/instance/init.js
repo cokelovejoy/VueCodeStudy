@@ -32,18 +32,21 @@ export function initMixin (Vue: Class<Component>) {
     // a flag to avoid this being observed
     vm._isVue = true
     // merge options
+    // 合并options选项
     if (options && options._isComponent) {
-      // optimize internal component instantiation (优化内部组件的实例化)
+      // optimize internal component instantiation (优化内部组件实例化)
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment. (由于动态选项合并很慢,而且内部组件选项不需要特别处理)
       // 初始化内部组件
+      // 是组件的话就会进入这个if
       initInternalComponent(vm, options)
     } else {
       // vm.constructor 就是 Vue 
       // 将Vue 的options 和 当前实例的options合并
+      // 是Vue构造函数的时候，先将这个Vue的options和vm实例的options合并。
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor), // Vue's options
-        options || {},                             // vm's options
+        options || {},                             // options
         vm
       )
     }
@@ -88,10 +91,11 @@ export function initInternalComponent (vm: Component, options: InternalComponent
 
   const vnodeComponentOptions = parentVnode.componentOptions
   opts.propsData = vnodeComponentOptions.propsData
+  // 事件监听器
   opts._parentListeners = vnodeComponentOptions.listeners
   opts._renderChildren = vnodeComponentOptions.children
   opts._componentTag = vnodeComponentOptions.tag
-
+  // 有render选项
   if (options.render) {
     opts.render = options.render
     opts.staticRenderFns = options.staticRenderFns

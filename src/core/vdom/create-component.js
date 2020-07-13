@@ -154,6 +154,7 @@ export function createComponent (
   resolveConstructorOptions(Ctor)
 
   // transform component v-model data into props & events
+  // 判断有没有v-model ，转换v-model
   if (isDef(data.model)) {
     transformModel(Ctor.options, data)
   }
@@ -193,6 +194,7 @@ export function createComponent (
   const name = Ctor.options.name || tag
   // 自定义组件的VNode
   const vnode = new VNode(
+    // vue-component-1-comp
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, context,
     { Ctor, propsData, listeners, tag, children },
@@ -230,6 +232,7 @@ export function createComponentInstanceForVnode (
 
 function installComponentHooks (data: VNodeData) {
   const hooks = data.hook || (data.hook = {})
+  // 合并用户钩子
   for (let i = 0; i < hooksToMerge.length; i++) {
     const key = hooksToMerge[i]
     const existing = hooks[key]

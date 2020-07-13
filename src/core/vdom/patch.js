@@ -30,6 +30,7 @@ import {
 
 export const emptyNode = new VNode('', {}, [])
 
+// 属性更新钩子
 const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 
 function sameVnode (a, b) {
@@ -73,10 +74,13 @@ export function createPatchFunction (backend) {
 
   const { modules, nodeOps } = backend
 
-  for (i = 0; i < hooks.length; ++i) {
+  for (i = 0; i < hooks.length; ++i) {、
+    // 指定cbs对象：cbs.create = []
     cbs[hooks[i]] = []
     for (j = 0; j < modules.length; ++j) {
       if (isDef(modules[j][hooks[i]])) {
+        // 添加到指定钩子的数组中
+        // cbs.create = [fn1, fn2,...]
         cbs[hooks[i]].push(modules[j][hooks[i]])
       }
     }
@@ -557,7 +561,7 @@ export function createPatchFunction (backend) {
 
     const oldCh = oldVnode.children
     const ch = vnode.children
-    // 属性更新
+    // 执行属性更新
     if (isDef(data) && isPatchable(vnode)) {
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
       if (isDef(i = data.hook) && isDef(i = i.update)) i(oldVnode, vnode)

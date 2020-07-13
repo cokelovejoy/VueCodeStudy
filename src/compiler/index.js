@@ -16,7 +16,7 @@ export const createCompiler = createCompilerCreator(function baseCompile (
   // AST 就是JS对象,类似VNode
   const ast = parse(template.trim(), options)
   if (options.optimize !== false) {
-    // 优化:静态化标记 (之后可以直接复用)
+    // 优化: 静态化标记 (之后可以直接复用)，不需要diff的做个标记
     optimize(ast, options)
   }
   // 生成: AST转换为代码字符串.'function(){}'

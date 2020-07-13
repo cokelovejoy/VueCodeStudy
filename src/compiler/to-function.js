@@ -51,6 +51,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // check cache
+    // 编译结果的缓存
     const key = options.delimiters
       ? String(options.delimiters) + template
       : template
@@ -59,6 +60,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // compile
+    // 编译
     const compiled = compile(template, options)
 
     // check compilation errors/tips
@@ -90,6 +92,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // turn code into functions
+    // 转换为函数
     const res = {}
     const fnGenErrors = []
     res.render = createFunction(compiled.render, fnGenErrors)

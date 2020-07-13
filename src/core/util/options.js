@@ -400,6 +400,7 @@ function assertObjectType (name: string, value: any, vm: ?Component) {
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
  */
+// 两个options对象合并成一个对象返回
 export function mergeOptions (
   parent: Object, // Vue's options
   child: Object,  // vm's options
@@ -412,15 +413,18 @@ export function mergeOptions (
   if (typeof child === 'function') {
     child = child.options
   }
-
+  // 处理props
   normalizeProps(child, vm)
+  // 处理Inject
   normalizeInject(child, vm)
+  // 处理Directives
   normalizeDirectives(child)
 
   // Apply extends and mixins on the child options,
   // but only if it is a raw options object that isn't
   // the result of another mergeOptions call.
   // Only merged options has the _base property.
+  // 处理 extends继承和mixins混入的 options，它们的options都要被合并处理
   // 有vm.options 有_base属性 进入递归调用
   if (!child._base) {
     if (child.extends) {

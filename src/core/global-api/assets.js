@@ -22,7 +22,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
         }
         if (type === 'component' && isPlainObject(definition)) {
           definition.name = definition.name || id
-          // 组件的构造函数创建 得到VueComponent
+          // 组件的构造函数创建 得到VueComponent的构造函数
           definition = this.options._base.extend(definition)
         }
         if (type === 'directive' && typeof definition === 'function') {

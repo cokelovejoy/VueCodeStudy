@@ -30,8 +30,11 @@ function flushCallbacks () {
 // where microtasks have too high a priority and fire in between supposedly
 // sequential events (e.g. #4521, #6690, which have workarounds)
 // or even between bubbling of the same event (#6566).
-// 1. 首选微任务执行异步操作: promise, mutationobserver
-// 2. 次选宏任务执行异步操作: setImmediate, setTimeout
+
+// 采用什么规则执行异步任务
+// 1. 首选微任务执行异步操作: promise, mutationobserver。使用微任务，浏览器会批量处理完微任务，浏览器再刷新。
+// 2. 次选宏任务执行异步操作: setImmediate。浏览器会将宏任务放入当前事件循环的下一轮事件循环的开始时候去执行。
+// 3. 最后选择setTimeout
 let timerFunc
 
 // The nextTick behavior leverages the microtask queue, which can be accessed
@@ -91,6 +94,7 @@ export function nextTick (cb?: Function, ctx?: Object) {
   callbacks.push(() => {
     if (cb) {
       try {
+        // cb 就是 flushSchedulerQueue
         cb.call(ctx)
       } catch (e) {
         handleError(e, ctx, 'nextTick')
