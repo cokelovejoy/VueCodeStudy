@@ -57,7 +57,8 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     observe(obj)
     return obj
   }
-
+  
+  // 此处为Vue构造函数添加了options属性，里面设置了默认的参数选项 components,directives,filters
   Vue.options = Object.create(null)
   ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)
@@ -65,8 +66,9 @@ export function initGlobalAPI (Vue: GlobalAPI) {
 
   // this is used to identify the "base" constructor to extend all plain-object
   // components with in Weex's multi-instance scenarios.
+  // 增加_base属性
   Vue.options._base = Vue
-  // 继承 将父组件中的属性 绑定到子组件中
+  // 将内置组件keep-alive添加到Vue.options.components下
   extend(Vue.options.components, builtInComponents)
   // Vue use()方法 用来注入插件
   initUse(Vue)

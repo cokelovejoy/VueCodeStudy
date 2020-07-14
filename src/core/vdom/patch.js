@@ -74,7 +74,7 @@ export function createPatchFunction (backend) {
 
   const { modules, nodeOps } = backend
 
-  for (i = 0; i < hooks.length; ++i) {、
+  for (i = 0; i < hooks.length; ++i) {
     // 指定cbs对象：cbs.create = []
     cbs[hooks[i]] = []
     for (j = 0; j < modules.length; ++j) {

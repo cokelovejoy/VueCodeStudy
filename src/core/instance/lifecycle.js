@@ -40,7 +40,6 @@ export function initLifecycle (vm: Component) {
     //  如果父组件存在, 把当前组件实例加入到父组件de $children中
     parent.$children.push(vm)
   }
-
   vm.$parent = parent
   vm.$root = parent ? parent.$root : vm
   vm.$children = []
@@ -139,6 +138,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+// $mount() 调用mountComponent这个函数
 export function mountComponent (
   vm: Component,
   el: ?Element,

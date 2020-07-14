@@ -19,7 +19,8 @@ import { patch } from './patch'
 import platformDirectives from './directives/index'
 import platformComponents from './components/index'
 
-// install platform specific utils
+// install platform specific 
+// Web平台特定的公用方法
 Vue.config.mustUseProp = mustUseProp
 Vue.config.isReservedTag = isReservedTag
 Vue.config.isReservedAttr = isReservedAttr
@@ -27,7 +28,9 @@ Vue.config.getTagNamespace = getTagNamespace
 Vue.config.isUnknownElement = isUnknownElement
 
 // install platform runtime directives & components
+// 将v-model v-show 指令添加到Vue.options.directives
 extend(Vue.options.directives, platformDirectives)
+// 将内置组件Transition， TransitionGroup添加到Vue.options.components上
 extend(Vue.options.components, platformComponents)
 
 // install platform patch function

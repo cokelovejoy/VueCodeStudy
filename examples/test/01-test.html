@@ -10,26 +10,30 @@
     <div id="app">
        <h1>{{ msg1 }}</h1>
        <p>{{ msg1 }}</p>
-       <my-component :msg2="msg2" :msg1="msg1"></my-component>
+       <!-- <my-component :msg2="msg2" :msg1="msg1"></my-component> -->
     </div>
     <script src="../../dist/vue.js"></script>
     <script>
-        // Vue.component('myComponent', {
-        //     props: ['todo', 'msg1'],
-        //     template: '<h1>it is {{ msg1 }}</h1><p>{{ msg2 }}</p>'
+        // Vue.component('my-component', {
+        //     props: ['msg1', 'msg2'],
+        //     template: 
+        //         `<div>
+        //             <h1>it is my component {{ msg1 }}</h1>
+        //             <p>{{ msg2 }}</p>
+        //         </div>`,
+        //     render: function(h) {
+        //         return h('h1', 'helloworld')
+        //     }
         // })
-        var myComponent = {
-             props: ['msg2', 'msg1'],
-             template: `<h1>it is {{ msg1 }}{{ msg2 }} </h1>`
-        }
+        // var myComponent = {
+        //      props: ['msg2', 'msg1'],
+        //      template: `<h1>it is {{ msg1 }}{{ msg2 }} </h1>`
+        // }
         var vm = new Vue({
             el: '#app',
             data: {
                 msg1:'hello vue',
                 msg2: 'coke'
-            },
-            components: {
-                'my-component': myComponent
             }
         })
     </script>

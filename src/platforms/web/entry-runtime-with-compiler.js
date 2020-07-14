@@ -23,28 +23,28 @@ Vue.prototype.$mount = function (
 ): Component {
   el = el && query(el)
 
-/* istanbul ignore if */
-// 对于任何非空HTML文档，document.documentElement将始终是一个<html>元素.
-// document.body 返回当前文档的 <body> 元素.
-// el如果是html和body,则不能挂载,退出.
+  /* istanbul ignore if */
+  // 对于任何非空HTML文档，document.documentElement将始终是一个<html>元素.
+  // document.body 返回当前文档的 <body> 元素.
+  // el如果是html和body,则不能挂载,退出.
   if (el === document.body || el === document.documentElement) {
     process.env.NODE_ENV !== 'production' && warn(
       `Do not mount Vue to <html> or <body> - mount to normal elements instead.`
     )
-// 退出
+  // 退出
     return this
   }
-// 处理 el 和 template 选项
-// 获取当前实例的属性选项
+  // 处理 el 和 template 选项
+  // 获取当前实例的属性选项
   const options = this.$options
-// resolve template/el and convert to render function
-// render不存在时 才考虑 el 和 template选项(优先级 render > template > el)
-// 如果实例定义的属性选项$options中没有render属性
+  // resolve template/el and convert to render function
+  // render不存在时 才考虑 el 和 template选项(优先级 render > template > el)
+  // 如果实例定义的属性选项$options中没有render属性
   if (!options.render) {
     let template = options.template
-// 如果有template
+  // 如果有template
     if (template) {
-// template 是DOM元素的选择器的字符串时
+  // template 是DOM元素的选择器的字符串时
       if (typeof template === 'string') {
 // id选择器
         if (template.charAt(0) === '#') {
@@ -59,7 +59,7 @@ Vue.prototype.$mount = function (
           }
         }
       } 
-// template 是一个dom元素时 (nodeType属性为1 为元素节点,为2为属性节点)
+  // template 是一个dom元素时 (nodeType属性为1 为元素节点,为2为属性节点)
       else if (template.nodeType) {
 // 取节点的innerHTML,返回html的字符串
         template = template.innerHTML
@@ -70,21 +70,21 @@ Vue.prototype.$mount = function (
         return this
       }
     }
-// 判断el是否存在 
+  // 判断el是否存在 
     else if (el) {
-// 获取el中的元素,并赋值给template
+  // 获取el中的元素,并赋值给template
       template = getOuterHTML(el)
     }
-// 判断template不为空
+  // 判断template不为空
     if (template) {
-/* istanbul ignore if */
+  /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
 // 标记时间戳
         mark('compile')
       }
-// 编译成render函数
-// 最终都是为了将template字符串转换成 render函数
-// 执行compileToFunctions()  返回 { render, staticRenderFns } render 是渲染函数 ，mountComponent()里面会用到
+  // 编译成render函数
+  // 最终都是为了将template字符串转换成 render函数
+  // 执行compileToFunctions()  返回 { render, staticRenderFns } render 是渲染函数 ，mountComponent()里面会用到
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
@@ -96,7 +96,7 @@ Vue.prototype.$mount = function (
       options.render = render
       options.staticRenderFns = staticRenderFns
 
-/* istanbul ignore if */
+  /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile end')
         measure(`vue ${this._name} compile`, 'compile', 'compile end')

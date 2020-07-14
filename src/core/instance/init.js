@@ -33,20 +33,20 @@ export function initMixin (Vue: Class<Component>) {
     vm._isVue = true
     // merge options
     // 合并options选项
+    // 如果是 组件实例Vue component，options中就会有_isComponent属性
+    // 初始化内部组件, 对组件的options做处理
     if (options && options._isComponent) {
       // optimize internal component instantiation (优化内部组件实例化)
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment. (由于动态选项合并很慢,而且内部组件选项不需要特别处理)
-      // 初始化内部组件
-      // 是组件的话就会进入这个if
       initInternalComponent(vm, options)
     } else {
-      // vm.constructor 就是 Vue 
-      // 将Vue 的options 和 当前实例的options合并
-      // 是Vue构造函数的时候，先将这个Vue的options和vm实例的options合并。
+      // Vue 根实例创建时，先将这个Vue 构造函数的默认options和o用户传入的options合并。
+      // vm.constructor 就是 Vue 构造函数
+      // mergeOptions方法是为了将构造函数的 默认options 和 用户传入的options合并成一个对象
       vm.$options = mergeOptions(
-        resolveConstructorOptions(vm.constructor), // Vue's options
-        options || {},                             // options
+        resolveConstructorOptions(vm.constructor), // Vue构造函数的默认参数
+        options || {},                             // 用户传入的options
         vm
       )
     }
@@ -89,13 +89,13 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   opts.parent = options.parent
   opts._parentVnode = parentVnode
 
-  const vnodeComponentOptions = parentVnode.componentOptions
-  opts.propsData = vnodeComponentOptions.propsData
+  const vnodeComponentOptions = parentVnode.componentOptions // 组件的选项
+  opts.propsData = vnodeComponentOptions.propsData // 组件的propsData
   // 事件监听器
-  opts._parentListeners = vnodeComponentOptions.listeners
-  opts._renderChildren = vnodeComponentOptions.children
-  opts._componentTag = vnodeComponentOptions.tag
-  // 有render选项
+  opts._parentListeners = vnodeComponentOptions.listeners // 组件的listener
+  opts._renderChildren = vnodeComponentOptions.children   // 组件的children
+  opts._componentTag = vnodeComponentOptions.tag          // 组件的tag
+  // options有render选项
   if (options.render) {
     opts.render = options.render
     opts.staticRenderFns = options.staticRenderFns
@@ -103,9 +103,12 @@ export function initInternalComponent (vm: Component, options: InternalComponent
 }
 
 // Ctor is Constructor (Vue)
+// Ctor 就是Vue 构造函数
+// 处理Vue的默认参数
 export function resolveConstructorOptions (Ctor: Class<Component>) {
   let options = Ctor.options
   // 没有继承,就没有super属性
+  // 如果Ctor是Vue构造函数，则直接返回Ctor.options
   if (Ctor.super) {
     const superOptions = resolveConstructorOptions(Ctor.super)
     const cachedSuperOptions = Ctor.superOptions
@@ -114,18 +117,19 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
       // need to resolve new options.
       Ctor.superOptions = superOptions
       // check if there are any late-modified/attached options (#4976)
+      // 处理修改过的options
       const modifiedOptions = resolveModifiedOptions(Ctor)
       // update base extend options
       if (modifiedOptions) {
         extend(Ctor.extendOptions, modifiedOptions)
       }
+      // 合并两个options
       options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions)
       if (options.name) {
         options.components[options.name] = Ctor
       }
     }
   }
-  // 返回 Vue 的 options
   return options
 }
 
