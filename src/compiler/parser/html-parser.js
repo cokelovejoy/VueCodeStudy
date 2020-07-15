@@ -14,19 +14,29 @@ import { isNonPhrasingTag } from 'web/compiler/util'
 import { unicodeRegExp } from 'core/util/lang'
 
 // Regular Expressions for parsing tags and attributes
+// 针对要截取的内容设置的正则表达式
+// 属性
 const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
+// 匹配动态参数属性
 const dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
 const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeRegExp.source}]*`
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`
+// 匹配 <div
 const startTagOpen = new RegExp(`^<${qnameCapture}`)
+// 匹配 />
 const startTagClose = /^\s*(\/?)>/
+// 匹配 结束标签 </div>
 const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
+// 匹配 <!DOCTYPE >
 const doctype = /^<!DOCTYPE [^>]+>/i
 // #7298: escape - to avoid being passed as HTML comment when inlined in page
+// 匹配 注释 <!-->
 const comment = /^<!\--/
+// 匹配 条件注释
 const conditionalComment = /^<!\[/
 
 // Special Elements (can contain anything)
+// 特殊的标签 script,style,textarea
 export const isPlainTextElement = makeMap('script,style,textarea', true)
 const reCache = {}
 
@@ -51,6 +61,7 @@ function decodeAttr (value, shouldDecodeNewlines) {
   return value.replace(re, match => decodingMap[match])
 }
 
+// parse核心，解析template，生成AST
 export function parseHTML (html, options) {
   const stack = []
   const expectHTML = options.expectHTML
@@ -58,11 +69,15 @@ export function parseHTML (html, options) {
   const canBeLeftOpenTag = options.canBeLeftOpenTag || no
   let index = 0
   let last, lastTag
+  // 循环截取html字符串，一直截取到html为空
   while (html) {
     last = html
     // Make sure we're not in a plaintext content element like script/style
     if (!lastTag || !isPlainTextElement(lastTag)) {
+      // 使用html.indexOf('<')的索引去判断
       let textEnd = html.indexOf('<')
+      // = 0 就代表这是注释，doctype，开始标签，结束标签中的一种
+      
       if (textEnd === 0) {
         // Comment:
         if (comment.test(html)) {
@@ -115,6 +130,7 @@ export function parseHTML (html, options) {
       }
 
       let text, rest, next
+      // >= 0 就代表是文本，表达式
       if (textEnd >= 0) {
         rest = html.slice(textEnd)
         while (
@@ -131,7 +147,7 @@ export function parseHTML (html, options) {
         }
         text = html.substring(0, textEnd)
       }
-
+      // < 0 就代表是 html截取完了，可能剩下一些文本，表达式
       if (textEnd < 0) {
         text = html
       }
@@ -177,13 +193,14 @@ export function parseHTML (html, options) {
   }
 
   // Clean up any remaining tags
+  // 清除剩下的标签
   parseEndTag()
 
   function advance (n) {
     index += n
     html = html.substring(n)
   }
-
+  // 解析开始标签
   function parseStartTag () {
     const start = html.match(startTagOpen)
     if (start) {
@@ -208,7 +225,7 @@ export function parseHTML (html, options) {
       }
     }
   }
-
+  // 处理开始标签
   function handleStartTag (match) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
@@ -251,7 +268,7 @@ export function parseHTML (html, options) {
       options.start(tagName, attrs, unary, match.start, match.end)
     }
   }
-
+  // 解析结束标签
   function parseEndTag (tagName, start, end) {
     let pos, lowerCasedTagName
     if (start == null) start = index

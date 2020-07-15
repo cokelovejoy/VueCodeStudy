@@ -59,7 +59,8 @@ export function createCompilerCreator (baseCompile: Function): Function {
       }
 
       finalOptions.warn = warn
-
+      // 真正执行编译的地方 baseCompile()
+      // 编译之后的返回结果： {ast, render, staticRenderFns}
       const compiled = baseCompile(template.trim(), finalOptions)
       if (process.env.NODE_ENV !== 'production') {
         detectErrors(compiled.ast, warn)

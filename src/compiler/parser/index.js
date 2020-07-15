@@ -76,6 +76,7 @@ export function createASTElement (
 /**
  * Convert HTML string to AST.
  */
+// 转换HTML字符串为AST
 export function parse (
   template: string,
   options: CompilerOptions
@@ -97,6 +98,7 @@ export function parse (
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
   const whitespaceOption = options.whitespace
+  // AST的根结点
   let root
   let currentParent
   let inVPre = false
@@ -200,7 +202,7 @@ export function parse (
       )
     }
   }
-  // 解析HTML时 parse关键,在这个过程中会用到parseTest,parseFilter
+  // parse核心，解析模板，填充root。
   parseHTML(template, {
     warn,
     expectHTML: options.expectHTML,
