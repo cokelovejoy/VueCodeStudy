@@ -41,7 +41,7 @@ export function initMixin (Vue: Class<Component>) {
       // internal component options needs special treatment. (由于动态选项合并很慢,而且内部组件选项不需要特别处理)
       initInternalComponent(vm, options)
     } else {
-      // Vue 根实例创建时，先将这个Vue 构造函数的默认options和o用户传入的options合并。
+      // Vue 根实例创建时，先将这个Vue 构造函数的默认options和用户传入的options合并。
       // vm.constructor 就是 Vue 构造函数
       // mergeOptions方法是为了将构造函数的 默认options 和 用户传入的options合并成一个对象
       vm.$options = mergeOptions(

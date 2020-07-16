@@ -73,13 +73,14 @@ export function parseHTML (html, options) {
   while (html) {
     last = html
     // Make sure we're not in a plaintext content element like script/style
+    // 不是纯内容元素
     if (!lastTag || !isPlainTextElement(lastTag)) {
       // 使用html.indexOf('<')的索引去判断
       let textEnd = html.indexOf('<')
-      // = 0 就代表这是注释，doctype，开始标签，结束标签中的一种
-      
+      // = 0 就代表这是注释, 条件注释，doctype，开始标签，结束标签中的一种
       if (textEnd === 0) {
         // Comment:
+        // 匹配注释 <!-->
         if (comment.test(html)) {
           const commentEnd = html.indexOf('-->')
 
@@ -87,11 +88,12 @@ export function parseHTML (html, options) {
             if (options.shouldKeepComment) {
               options.comment(html.substring(4, commentEnd), index, index + commentEnd + 3)
             }
+            // 记录索引移动总数，截取html
             advance(commentEnd + 3)
             continue
           }
         }
-
+        // 匹配条件注释
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
         if (conditionalComment.test(html)) {
           const conditionalEnd = html.indexOf(']>')
@@ -101,7 +103,7 @@ export function parseHTML (html, options) {
             continue
           }
         }
-
+        // 匹配<!DOCTYPE >
         // Doctype:
         const doctypeMatch = html.match(doctype)
         if (doctypeMatch) {
@@ -110,6 +112,7 @@ export function parseHTML (html, options) {
         }
 
         // End tag:
+        // 匹配结束标签
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
           const curIndex = index
@@ -119,6 +122,7 @@ export function parseHTML (html, options) {
         }
 
         // Start tag:
+        // 开始标签
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
           handleStartTag(startTagMatch)
@@ -132,33 +136,41 @@ export function parseHTML (html, options) {
       let text, rest, next
       // >= 0 就代表是文本，表达式
       if (textEnd >= 0) {
+        // 截取从索引开始到最后的所有字符。
         rest = html.slice(textEnd)
         while (
-          !endTag.test(rest) &&
-          !startTagOpen.test(rest) &&
-          !comment.test(rest) &&
-          !conditionalComment.test(rest)
+          !endTag.test(rest) &&           // 没有匹配到结束标签 </>
+          !startTagOpen.test(rest) &&     // 没有匹配到  <xxx
+          !comment.test(rest) &&          // 没有匹配到注释标签 <!--
+          !conditionalComment.test(rest)  // 没有匹配到条件注释标签 <![
         ) {
           // < in plain text, be forgiving and treat it as text
+          // < 在纯文本中，把它当作text
+          // 从字符串中除了第一个 < 以外的字符中查找 下一个 < 的索引
           next = rest.indexOf('<', 1)
+          // 没有找到 < 退出循环
           if (next < 0) break
+          // 移动要开始截取的游标索引
           textEnd += next
+          // 截取剩余的字符
           rest = html.slice(textEnd)
         }
+        // 截取文本
         text = html.substring(0, textEnd)
       }
       // < 0 就代表是 html截取完了，可能剩下一些文本，表达式
       if (textEnd < 0) {
         text = html
       }
-
+      // 处理字符串
       if (text) {
         advance(text.length)
       }
-
+      //处理text
       if (options.chars && text) {
         options.chars(text, index - text.length, index)
       }
+      console.log('html', html)
     } else {
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()
@@ -180,6 +192,7 @@ export function parseHTML (html, options) {
       })
       index += html.length - rest.length
       html = rest
+      // 处理结束标签
       parseEndTag(stackedTag, index - endTagLength, index)
     }
 

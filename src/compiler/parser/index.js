@@ -98,9 +98,11 @@ export function parse (
   const stack = []
   const preserveWhitespace = options.preserveWhitespace !== false
   const whitespaceOption = options.whitespace
-  // AST的根结点
+  // 设置AST的根结点
   let root
+  // 设置当前父节点
   let currentParent
+
   let inVPre = false
   let inPre = false
   let warned = false
@@ -284,7 +286,7 @@ export function parse (
         processIf(element)
         processOnce(element)
       }
-
+      // 检查root对象
       if (!root) {
         root = element
         if (process.env.NODE_ENV !== 'production') {
@@ -312,6 +314,7 @@ export function parse (
     },
 
     chars (text: string, start: number, end: number) {
+      //  没有currentParent对象的时候
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production') {
           if (text === template) {
@@ -336,6 +339,8 @@ export function parse (
       ) {
         return
       }
+
+      // 子结点数组
       const children = currentParent.children
       if (inPre || text.trim()) {
         text = isTextTag(currentParent) ? text : decodeHTMLCached(text)
@@ -353,6 +358,7 @@ export function parse (
       } else {
         text = preserveWhitespace ? ' ' : ''
       }
+      // text存在
       if (text) {
         if (!inPre && whitespaceOption === 'condense') {
           // condense consecutive whitespaces into single space
@@ -360,6 +366,7 @@ export function parse (
         }
         let res
         let child: ?ASTNode
+        // AST表达式结点类型
         if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
           child = {
             type: 2,
@@ -368,11 +375,13 @@ export function parse (
             text
           }
         } else if (text !== ' ' || !children.length || children[children.length - 1].text !== ' ') {
+          // AST文本结点类型
           child = {
             type: 3,
             text
           }
         }
+        // 收集AST子结点
         if (child) {
           if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
             child.start = start
@@ -382,10 +391,12 @@ export function parse (
         }
       }
     },
+    // 处理注释
     comment (text: string, start, end) {
       // adding anyting as a sibling to the root node is forbidden
       // comments should still be allowed, but ignored
       if (currentParent) {
+        // AST文本结点
         const child: ASTText = {
           type: 3,
           text,
@@ -399,6 +410,7 @@ export function parse (
       }
     }
   })
+  console.log('root', root)
   return root
 }
 
