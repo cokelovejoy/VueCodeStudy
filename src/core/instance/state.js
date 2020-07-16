@@ -344,6 +344,7 @@ export function stateMixin (Vue: Class<Component>) {
         this
       )
     }
+    // props 不能改变它的值
     propsDef.set = function () {
       warn(`$props is readonly.`, this)
     }

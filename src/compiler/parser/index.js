@@ -56,7 +56,7 @@ let platformIsPreTag
 let platformMustUseProp
 let platformGetTagNamespace
 let maybeComponent
-
+// 创建AST的元素类型节点
 export function createASTElement (
   tag: string,
   attrs: Array<ASTAttr>,
@@ -66,7 +66,7 @@ export function createASTElement (
     type: 1,
     tag,
     attrsList: attrs,
-    attrsMap: makeAttrsMap(attrs),
+    attrsMap: makeAttrsMap(attrs), //属性Mapping  从数组转换成对象
     rawAttrsMap: {},
     parent,
     children: []
@@ -94,13 +94,16 @@ export function parse (
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
 
   delimiters = options.delimiters
-
-  const stack = []
+  // 缓存模板中每个标签解析的ASTNode，主要是为了理清节点父子关系
+  // 不会存放单标签的ast，比如input，img
+  const stack = [] 
   const preserveWhitespace = options.preserveWhitespace !== false
   const whitespaceOption = options.whitespace
-  // 设置AST的根结点
+  // AST的根结点
   let root
-  // 设置当前父节点
+  // 当前解析的标签的父节点
+  //在解析标签的时候，必须要知道这个标签的 父节点是谁，这样才知道 这个标签是谁的子节点，才能把这个节点添加给相应的 节点的 children
+  // 根节点 没有 父节点，所以就是 undefined
   let currentParent
 
   let inVPre = false
@@ -214,6 +217,7 @@ export function parse (
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
+    // 处理头标签的属性
     start (tag, attrs, unary, start, end) {
       // check namespace.
       // inherit parent ns if there is one
@@ -277,6 +281,7 @@ export function parse (
       if (platformIsPreTag(element.tag)) {
         inPre = true
       }
+      // 解析头标签的属性，attrs
       if (inVPre) {
         processRawAttrs(element)
       } else if (!element.processed) {
@@ -286,14 +291,14 @@ export function parse (
         processIf(element)
         processOnce(element)
       }
-      // 检查root对象
+      // 没有root，就设置root
       if (!root) {
         root = element
         if (process.env.NODE_ENV !== 'production') {
           checkRootConstraints(root)
         }
       }
-
+      // 不是单标签，就需要保存stack
       if (!unary) {
         currentParent = element
         stack.push(element)
@@ -301,20 +306,28 @@ export function parse (
         closeElement(element)
       }
     },
-
+    // 匹配到 尾标签时调用，比如 "</div>" 
     end (tag, start, end) {
       const element = stack[stack.length - 1]
       // pop stack
+      // stack 保存的是匹配到的头标签，如果标签已经匹配结束了，那么就需要移除
+      // stack 中最后一个节点，永远是下次匹配的节点的父节点
       stack.length -= 1
+      // 重置currentParent，解析到下一个头标签时
+      // curentParent永远是下次匹配的节点的父节点
       currentParent = stack[stack.length - 1]
       if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
         element.end = end
       }
       closeElement(element)
     },
-
+    // 处理文本字符串
+    // 匹配< 的时候，<之前还有一段距离的内容， 这段距离的内容就是文本。
+    // 这段代码的作用是：为父节点添加文本子节点。
+    // 文本子节点分两种类型，1.纯文本，直接保存为文本子节点 2.表达式形，需要parseText解析处理
     chars (text: string, start: number, end: number) {
       //  没有currentParent对象的时候
+      // 必须存在根节点，不能用文字开头
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production') {
           if (text === template) {

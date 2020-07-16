@@ -61,9 +61,10 @@ function decodeAttr (value, shouldDecodeNewlines) {
   return value.replace(re, match => decodingMap[match])
 }
 
-// parse核心，解析template，生成AST
+// parse核心
+// 根据匹配的不同内容，使用对应的方法处理
 export function parseHTML (html, options) {
-  const stack = []
+  const stack = [] // 缓存模板中解析的ASTNode
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
   const canBeLeftOpenTag = options.canBeLeftOpenTag || no
@@ -78,14 +79,17 @@ export function parseHTML (html, options) {
       // 使用html.indexOf('<')的索引去判断
       let textEnd = html.indexOf('<')
       // = 0 就代表这是注释, 条件注释，doctype，开始标签，结束标签中的一种
+      // 模板的起始位置是 <
       if (textEnd === 0) {
         // Comment:
         // 匹配注释 <!-->
         if (comment.test(html)) {
+          // 找到'-->'的索引
           const commentEnd = html.indexOf('-->')
 
           if (commentEnd >= 0) {
             if (options.shouldKeepComment) {
+              // 截取注释中的字符串，并生成Text类型的AST节点
               options.comment(html.substring(4, commentEnd), index, index + commentEnd + 3)
             }
             // 记录索引移动总数，截取html
@@ -117,6 +121,7 @@ export function parseHTML (html, options) {
         if (endTagMatch) {
           const curIndex = index
           advance(endTagMatch[0].length)
+          // 解析结束标签
           parseEndTag(endTagMatch[1], curIndex, index)
           continue
         }
@@ -135,6 +140,7 @@ export function parseHTML (html, options) {
 
       let text, rest, next
       // >= 0 就代表是文本，表达式
+      // 模板的起始位置不是<，而是文字
       if (textEnd >= 0) {
         // 截取从索引开始到最后的所有字符。
         rest = html.slice(textEnd)
@@ -158,7 +164,7 @@ export function parseHTML (html, options) {
         // 截取文本
         text = html.substring(0, textEnd)
       }
-      // < 0 就代表是 html截取完了，可能剩下一些文本，表达式
+      // < 0 就代表是 没有< 了，可能剩下一些文本，表达式
       if (textEnd < 0) {
         text = html
       }
@@ -209,6 +215,7 @@ export function parseHTML (html, options) {
   // 清除剩下的标签
   parseEndTag()
 
+  // 记录游标总共移动了多少的，并且截取出剩下的字符串返回给html
   function advance (n) {
     index += n
     html = html.substring(n)

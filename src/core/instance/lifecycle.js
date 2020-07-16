@@ -37,14 +37,14 @@ export function initLifecycle (vm: Component) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
-    //  如果父组件存在, 把当前组件实例加入到父组件de $children中
+    // 如果父组件存在, 把当前组件实例加入到父组件的 $children中
     parent.$children.push(vm)
   }
   vm.$parent = parent
   vm.$root = parent ? parent.$root : vm
   vm.$children = []
   vm.$refs = {}
-
+  // 私有属性
   vm._watcher = null
   vm._inactive = null
   vm._directInactive = false
