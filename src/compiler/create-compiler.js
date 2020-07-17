@@ -39,10 +39,12 @@ export function createCompilerCreator (baseCompile: Function): Function {
           }
         }
         // merge custom modules
+        // 合并自定义的modeules
         if (options.modules) {
           finalOptions.modules =
             (baseOptions.modules || []).concat(options.modules)
         }
+        // 合并自定义的指令
         // merge custom directives
         if (options.directives) {
           finalOptions.directives = extend(
@@ -51,6 +53,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
           )
         }
         // copy other options
+        // 复制其他的options
         for (const key in options) {
           if (key !== 'modules' && key !== 'directives') {
             finalOptions[key] = options[key]

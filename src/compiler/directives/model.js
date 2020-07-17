@@ -3,6 +3,7 @@
 /**
  * Cross-platform code generation for component v-model
  */
+// 返回设置value值的一个对象
 export function genComponentModel (
   el: ASTElement,
   value: string,
@@ -33,6 +34,9 @@ export function genComponentModel (
 /**
  * Cross-platform codegen helper for generating v-model value assignment code.
  */
+// 生成 v-model的值
+// 返回类似 data = _n($$v.trim())的字符串
+// 或者 $set(data, key, _n($$v.trim())) 字符串
 export function genAssignmentCode (
   value: string,
   assignment: string
@@ -47,9 +51,9 @@ export function genAssignmentCode (
 
 /**
  * Parse a v-model expression into a base path and a final key segment.
- * Handles both dot-path and possible square brackets.
+ * Handles both dot-path and possible square brackets. 处理 . 和 []方括号
  *
- * Possible cases:
+ * Possible cases: v-model的值 可能以下形式
  *
  * - test
  * - test[key]
@@ -66,7 +70,7 @@ type ModelParseResult = {
   exp: string,
   key: string | null
 }
-
+// 解析 v-model的表达式
 export function parseModel (val: string): ModelParseResult {
   // Fix https://github.com/vuejs/vue/pull/7730
   // allow v-model="obj.val " (trailing whitespace)
@@ -118,7 +122,7 @@ function eof (): boolean {
 function isStringStart (chr: number): boolean {
   return chr === 0x22 || chr === 0x27
 }
-
+// 解析方括号
 function parseBracket (chr: number): void {
   let inBracket = 1
   expressionPos = index
@@ -136,7 +140,7 @@ function parseBracket (chr: number): void {
     }
   }
 }
-
+// 解析字符串
 function parseString (chr: number): void {
   const stringQuote = chr
   while (!eof()) {

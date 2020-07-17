@@ -6,7 +6,7 @@ import {
   getBindingAttr,
   baseWarn
 } from 'compiler/helpers'
-
+// 处理class
 function transformNode (el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticClass = getAndRemoveAttr(el, 'class')

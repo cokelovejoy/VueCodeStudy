@@ -176,7 +176,7 @@ export function parseHTML (html, options) {
       if (options.chars && text) {
         options.chars(text, index - text.length, index)
       }
-      console.log('html', html)
+      // console.log('html', html)
     } else {
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()

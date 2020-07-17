@@ -1,5 +1,6 @@
 /* @flow */
 
+// 对动态的v-model使用v-if 来扩展
 /**
  * Expand input[v-model] with dyanmic type bindings into v-if-else chains
  * Turn this:
@@ -22,8 +23,9 @@ import {
   addIfCondition,
   createASTElement
 } from 'compiler/parser/index'
-
+// 为input 的v-model的动态变量做处理
 function preTransformNode (el: ASTElement, options: CompilerOptions) {
+  // 标签是input
   if (el.tag === 'input') {
     const map = el.attrsMap
     if (!map['v-model']) {
@@ -43,10 +45,11 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
       const ifConditionExtra = ifCondition ? `&&(${ifCondition})` : ``
       const hasElse = getAndRemoveAttr(el, 'v-else', true) != null
       const elseIfCondition = getAndRemoveAttr(el, 'v-else-if', true)
-      // 1. checkbox
+      // 1. checkbox 复选框
       const branch0 = cloneASTElement(el)
       // process for on the main node
       processFor(branch0)
+      // ast添加type属性
       addRawAttr(branch0, 'type', 'checkbox')
       processElement(branch0, options)
       branch0.processed = true // prevent it from double-processed
@@ -55,7 +58,7 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
         exp: branch0.if,
         block: branch0
       })
-      // 2. add radio else-if condition
+      // 2. add radio else-if condition 单选框
       const branch1 = cloneASTElement(el)
       getAndRemoveAttr(branch1, 'v-for', true)
       addRawAttr(branch1, 'type', 'radio')
@@ -64,7 +67,7 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
         exp: `(${typeBinding})==='radio'` + ifConditionExtra,
         block: branch1
       })
-      // 3. other
+      // 3. other 其他
       const branch2 = cloneASTElement(el)
       getAndRemoveAttr(branch2, 'v-for', true)
       addRawAttr(branch2, ':type', typeBinding)

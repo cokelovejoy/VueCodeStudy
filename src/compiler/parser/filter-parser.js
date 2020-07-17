@@ -1,7 +1,11 @@
 /* @flow */
 
+// 匹配任意非空字符
+// 用于排除
 const validDivisionCharRE = /[\w).+\-_$\]]/
-
+// 解析 filter 的条件 是匹配 |
+// 并且| 不会在单引号'' 双引号"" 模板引用符`` 正则// 括号() 中括号[] 大括号{}
+// 并且不是 ||
 export function parseFilters (exp: string): string {
   let inSingle = false
   let inDouble = false
@@ -17,15 +21,15 @@ export function parseFilters (exp: string): string {
     prev = c
     c = exp.charCodeAt(i)
     if (inSingle) {
-      if (c === 0x27 && prev !== 0x5C) inSingle = false
+      if (c === 0x27 && prev !== 0x5C) inSingle = false            // 0x5C \
     } else if (inDouble) {
       if (c === 0x22 && prev !== 0x5C) inDouble = false
     } else if (inTemplateString) {
       if (c === 0x60 && prev !== 0x5C) inTemplateString = false
     } else if (inRegex) {
-      if (c === 0x2f && prev !== 0x5C) inRegex = false
+      if (c === 0x2f && prev !== 0x5C) inRegex = false             // 0x2f  /
     } else if (
-      c === 0x7C && // pipe
+      c === 0x7C &&                                                // 0x7C  | pipe
       exp.charCodeAt(i + 1) !== 0x7C &&
       exp.charCodeAt(i - 1) !== 0x7C &&
       !curly && !square && !paren
@@ -84,6 +88,7 @@ export function parseFilters (exp: string): string {
   return expression
 }
 
+// 处理filter表达式
 function wrapFilter (exp: string, filter: string): string {
   const i = filter.indexOf('(')
   if (i < 0) {

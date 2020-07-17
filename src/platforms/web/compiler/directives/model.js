@@ -11,6 +11,7 @@ let warn
 export const RANGE_TOKEN = '__r'
 export const CHECKBOX_RADIO_TOKEN = '__c'
 
+// 根据不同的tag类型，将v-model转化成不同事件绑定onchange, oninputed等原生事件属性。
 export default function model (
   el: ASTElement,
   dir: ASTDirective,
@@ -25,6 +26,7 @@ export default function model (
   if (process.env.NODE_ENV !== 'production') {
     // inputs with type="file" are read only and setting the input's
     // value will throw an error.
+    // 文件类型input 只读，设置值会报错
     if (tag === 'input' && type === 'file') {
       warn(
         `<${el.tag} v-model="${value}" type="file">:\n` +
@@ -35,18 +37,24 @@ export default function model (
   }
 
   if (el.component) {
+    // 组件的v-model
     genComponentModel(el, value, modifiers)
     // component v-model doesn't need extra runtime
     return false
   } else if (tag === 'select') {
+    // select
     genSelect(el, value, modifiers)
   } else if (tag === 'input' && type === 'checkbox') {
+    // input checkbox
     genCheckboxModel(el, value, modifiers)
   } else if (tag === 'input' && type === 'radio') {
+    // input radio
     genRadioModel(el, value, modifiers)
   } else if (tag === 'input' || tag === 'textarea') {
+    // input textarea
     genDefaultModel(el, value, modifiers)
   } else if (!config.isReservedTag(tag)) {
+    // 组件的v-model
     genComponentModel(el, value, modifiers)
     // component v-model doesn't need extra runtime
     return false
@@ -130,7 +138,7 @@ function genDefaultModel (
   modifiers: ?ASTModifiers
 ): ?boolean {
   const type = el.attrsMap.type
-
+  // v-bind:value 和 v-model有冲突。
   // warn if v-bind:value conflicts with v-model
   // except for inputs with v-bind:type
   if (process.env.NODE_ENV !== 'production') {

@@ -66,6 +66,8 @@ function prependModifierMarker (symbol: string, name: string, dynamic?: boolean)
     : symbol + name // mark the event as captured
 }
 
+// 检查modifiers参数是否存在，并根据参数中特定属性去重写name参数
+// 再根据是否有native修饰符来决定向el.nativeEvent 还是el.events添加对应名称的属性值{value: value.trim()}
 export function addHandler (
   el: ASTElement,
   name: string,
@@ -158,17 +160,20 @@ export function getRawBindingAttr (
     el.rawAttrsMap[name]
 }
 
+// 获取动态属性值
 export function getBindingAttr (
   el: ASTElement,
   name: string,
   getStatic?: boolean
 ): ?string {
+  // 获得动态属性绑定的变量名
   const dynamicValue =
     getAndRemoveAttr(el, ':' + name) ||
     getAndRemoveAttr(el, 'v-bind:' + name)
-  if (dynamicValue != null) {
+  if (dynamicValue != null) { // 动态变量 ：可能有 过滤器的
+    // 解析 filter
     return parseFilters(dynamicValue)
-  } else if (getStatic !== false) {
+  } else if (getStatic !== false) {   // 静态变量的 内容直接返回
     const staticValue = getAndRemoveAttr(el, name)
     if (staticValue != null) {
       return JSON.stringify(staticValue)
@@ -180,6 +185,8 @@ export function getBindingAttr (
 // doesn't get processed by processAttrs.
 // By default it does NOT remove it from the map (attrsMap) because the map is
 // needed during codegen.
+// 获得动态属性绑定的变量名，并在attrsList中移除
+// 例子  :a = "hh" v-bind:a = "hh", 获取变量名hh
 export function getAndRemoveAttr (
   el: ASTElement,
   name: string,

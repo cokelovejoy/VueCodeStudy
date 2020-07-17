@@ -161,7 +161,9 @@ export function cached<F: Function> (fn: F): F {
 /**
  * Camelize a hyphen-delimited string.
  */
+// 连字符正则
 const camelizeRE = /-(\w)/g
+// 将连字符的字符串转换为驼峰式
 export const camelize = cached((str: string): string => {
   return str.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
 })
