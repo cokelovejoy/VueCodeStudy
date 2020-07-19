@@ -145,6 +145,8 @@ export function mountComponent (
   hydrating?: boolean
 ): Component {
   vm.$el = el
+  // 先判断是否有render函数
+  // 没有就创建一个空的vnode，并赋值给render
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
@@ -165,6 +167,7 @@ export function mountComponent (
       }
     }
   }
+  // 生命周期函数调用时机-beforeMount
   callHook(vm, 'beforeMount')
 
   let updateComponent
@@ -187,9 +190,9 @@ export function mountComponent (
       measure(`vue ${name} patch`, startTag, endTag)
     }
   } else {
-    // 定义组件更新函数
+    // 定义组件更新函数-updateComponent
     // _render()执行可以产生 虚拟DOM,VNode
-    // _update()去做更新触发__patch__方法，将虚拟DOM转换成真实DOM
+    // _update()去做更新触发__patch__方法，然后将虚拟DOM转换成真实DOM
     updateComponent = () => {
       vm._update(vm._render(), hydrating)
     }
@@ -198,8 +201,8 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
-  // 挂载组件的时候就会 给当前组件 vm 创建 Watcher 实例
-  // Watcher里面的任何一个dep发生了改变，就会执行updateComponent函数一次。
+  // 挂载组件的时候就会 给当前组件 vm 创建 RenderWatcher
+  // Watcher里面的任何一个dep发生了改变，就会执行updateComponent函数一次，就会去重新patch，重新生成真实DOM。
   new Watcher(vm, updateComponent, noop, {
     before () {
       // 如果已经挂载并且没有被销毁 表示是 更新操作
@@ -214,6 +217,7 @@ export function mountComponent (
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {
     vm._isMounted = true
+    // 生命周期函数调用时机-mounted
     callHook(vm, 'mounted')
   }
   return vm

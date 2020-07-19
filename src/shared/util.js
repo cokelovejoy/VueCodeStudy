@@ -103,6 +103,7 @@ export function toNumber (val: string): number | string {
  * Make a map and return a function for checking if a key
  * is in that map.
  */
+// 生成一个map数组保存字段，返回一个函数，用来检查是否在数组中。
 export function makeMap (
   str: string,
   expectsLowerCase?: boolean
@@ -150,6 +151,7 @@ export function hasOwn (obj: Object | Array<*>, key: string): boolean {
 /**
  * Create a cached version of a pure function.
  */
+// 创建一个用于缓存的纯函数
 export function cached<F: Function> (fn: F): F {
   const cache = Object.create(null)
   return (function cachedFn (str: string) {
@@ -274,6 +276,7 @@ export const identity = (_: any) => _
 /**
  * Generate a string containing static keys from compiler modules.
  */
+// 生成一个包含静态key的字符串
 export function genStaticKeys (modules: Array<ModuleOptions>): string {
   return modules.reduce((keys, m) => {
     return keys.concat(m.staticKeys || [])
