@@ -194,6 +194,7 @@ export function mountComponent (
     // 定义组件更新函数-updateComponent
     // _render()执行可以产生 虚拟DOM,VNode
     // _update()去做更新触发__patch__方法，然后将虚拟DOM转换成真实DOM
+    // hydrating 服务端渲染用于激活client boundle。
     updateComponent = () => {
       vm._update(vm._render(), hydrating)
     }

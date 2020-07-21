@@ -109,7 +109,7 @@ export default class Watcher {
     // pushTarget(this) 会将当前watcher 赋值给Dep.target
     pushTarget(this)
     let value
-    const vm = this.vm
+    const vm = this.vm // 当前组件实例
     try {
       // 此时的getter函数就是： () => {vm._update(vm._render(), hydrating)} 用于更新组件, 先创建虚拟DOM，然后将虚拟DOM渲染为真实DOM
       // 在渲染的过程中触发了 响应式中的 get 函数，从而建立起 dep和watcher 之间的联系.
