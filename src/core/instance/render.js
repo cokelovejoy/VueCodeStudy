@@ -28,6 +28,7 @@ export function initRender (vm: Component) {
   // so that we get proper render context inside it.
   // args order: tag, data, children, normalizationType, alwaysNormalize
   // internal version is used by render functions compiled from templates
+  // a-tag, b-data, c-children, d-normalizationType
   vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
   // normalization is always applied for the public version, used in
   // user-written render functions.
@@ -61,6 +62,7 @@ export function setCurrentRenderingInstance (vm: Component) {
 
 export function renderMixin (Vue: Class<Component>) {
   // install runtime convenience helpers
+  // 安装render的帮助函数 如 _c, _v等到Vue原型链上。
   installRenderHelpers(Vue.prototype)
 
   Vue.prototype.$nextTick = function (fn: Function) {
@@ -78,7 +80,6 @@ export function renderMixin (Vue: Class<Component>) {
         vm.$scopedSlots
       )
     }
-
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.
     vm.$vnode = _parentVnode
@@ -89,7 +90,10 @@ export function renderMixin (Vue: Class<Component>) {
       // separately from one another. Nested component's render fns are called
       // when parent component is patched.
       currentRenderingInstance = vm
-      // render函数调用的时候会去获取已经绑定响应式的数据，调用get函数就会触发dep 和watcher 之间的相互绑定 
+      // render函数调用的时候会去获取已经绑定响应式的数据，调用get函数就会触发dep 和watcher 之间的相互绑定
+      // vm._renderProxy 就是vm实例
+      // vm.$createElement就是 渲染函数 (a, b, c, d) => createElement(vm, a, b, c, d, true)
+      // render函数返回 vnode
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
       handleError(e, vm, `render`)

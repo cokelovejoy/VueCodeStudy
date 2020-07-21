@@ -101,6 +101,7 @@ const componentVNodeHooks = {
 
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
+// 创建组件的VNode
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
   data: ?VNodeData,
@@ -193,7 +194,7 @@ export function createComponent (
 
   // return a placeholder vnode
   const name = Ctor.options.name || tag
-  // 自定义组件的VNode
+  // 核心-自定义组件的VNode
   const vnode = new VNode(
     // vue-component-1-comp
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,

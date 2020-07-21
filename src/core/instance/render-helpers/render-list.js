@@ -14,17 +14,22 @@ export function renderList (
   ) => VNode
 ): ?Array<VNode> {
   let ret: ?Array<VNode>, i, l, keys, key
+  // 遍历数组
   if (Array.isArray(val) || typeof val === 'string') {
     ret = new Array(val.length)
     for (i = 0, l = val.length; i < l; i++) {
+       // 生成vnode，保存到数组
       ret[i] = render(val[i], i)
     }
   } else if (typeof val === 'number') {
+    // 遍历数字
     ret = new Array(val)
     for (i = 0; i < val; i++) {
+      // 生成vnode，保存到数组
       ret[i] = render(i + 1, i)
     }
   } else if (isObject(val)) {
+    // 遍历对象
     if (hasSymbol && val[Symbol.iterator]) {
       ret = []
       const iterator: Iterator<any> = val[Symbol.iterator]()
@@ -46,5 +51,6 @@ export function renderList (
     ret = []
   }
   (ret: any)._isVList = true
+  // 返回vnode数组
   return ret
 }

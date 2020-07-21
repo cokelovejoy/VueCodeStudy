@@ -62,7 +62,6 @@ export function createCompileToFunctionFn (compile: Function): Function {
     // compile
     // 编译
     const compiled = compile(template, options)
-
     // check compilation errors/tips
     if (process.env.NODE_ENV !== 'production') {
       if (compiled.errors && compiled.errors.length) {
@@ -95,6 +94,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     // 转换为函数
     const res = {}
     const fnGenErrors = []
+    // 将代码字符串转换成render函数
     res.render = createFunction(compiled.render, fnGenErrors)
     res.staticRenderFns = compiled.staticRenderFns.map(code => {
       return createFunction(code, fnGenErrors)

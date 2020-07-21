@@ -1,25 +1,28 @@
 /* @flow */
 
+// VNode类 用于创建vnode实例
+// VNode是真实DOM树结点的简化版，一部分属性与真实DOM树的结点上的属性一一对应
+// 同时VNode上还有一些自身特有的属性，例如和组件相关的属性。
 export default class VNode {
-  tag: string | void;
-  data: VNodeData | void;
-  children: ?Array<VNode>;
-  text: string | void;
-  elm: Node | void;
-  ns: string | void;
-  context: Component | void; // rendered in this component's scope
-  key: string | number | void;
-  componentOptions: VNodeComponentOptions | void;
-  componentInstance: Component | void; // component instance
-  parent: VNode | void; // component placeholder node
+  tag: string | void;       // 当前结点的标签名
+  data: VNodeData | void;   // 当前结点的数据
+  children: ?Array<VNode>;  // 当前结点的子结点
+  text: string | void;      // 当前结点的文本
+  elm: Node | void;         // 对应的真实DOM结点
+  ns: string | void;        // 当前结点的命名空间
+  context: Component | void; // rendered in this component's scope // 当前结点的编译作用域
+  key: string | number | void; // 结点的key
+  componentOptions: VNodeComponentOptions | void; // 组件的options选项
+  componentInstance: Component | void; // component instance // 当前结点多对应的组件实例
+  parent: VNode | void; // component placeholder node // 当前结点的父节点
 
   // strictly internal
-  raw: boolean; // contains raw HTML? (server only)
-  isStatic: boolean; // hoisted static node
-  isRootInsert: boolean; // necessary for enter transition check
-  isComment: boolean; // empty comment placeholder?
-  isCloned: boolean; // is a cloned node?
-  isOnce: boolean; // is a v-once node?
+  raw: boolean; // contains raw HTML? (server only)  // 是否是原生的html
+  isStatic: boolean; // hoisted static node          // 是否是静态结点
+  isRootInsert: boolean; // necessary for enter transition check // 是否是作为根结点插入
+  isComment: boolean; // empty comment placeholder?              // 是否是注释
+  isCloned: boolean; // is a cloned node?                        // 是否是克隆的结点
+  isOnce: boolean; // is a v-once node?                          // 是否有once指令
   asyncFactory: Function | void; // async component factory function
   asyncMeta: Object | void;
   isAsyncPlaceholder: boolean;
@@ -39,7 +42,7 @@ export default class VNode {
     componentOptions?: VNodeComponentOptions,
     asyncFactory?: Function
   ) {
-    this.tag = tag
+    this.tag = tag   // 标签名
     this.data = data
     this.children = children
     this.text = text

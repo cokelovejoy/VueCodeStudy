@@ -35,6 +35,8 @@ extend(Vue.options.components, platformComponents)
 
 // install platform patch function
 // 实现了patch()方法(用来打补丁的,做diff用)
+// patch方法在不同的平台定义不一样
+// 如果是在服务端渲染，没有真实的浏览器环境，是不需要把VNode最终转换成DOM,因此是一个空函数。
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method

@@ -26,9 +26,9 @@ const ALWAYS_NORMALIZE = 2
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
 export function createElement (
-  context: Component,
-  tag: any,
-  data: any,
+  context: Component,           // 上下文
+  tag: any,                     // 标签名
+  data: any,                   
   children: any,
   normalizationType: any,
   alwaysNormalize: boolean
@@ -63,6 +63,7 @@ export function _createElement (
   if (isDef(data) && isDef(data.is)) {
     tag = data.is
   }
+
   if (!tag) {
     // in case of component :is set to falsy value
     return createEmptyVNode()
@@ -96,8 +97,8 @@ export function _createElement (
   // 根据标签 执行响应的操作.
   if (typeof tag === 'string') {
     let Ctor
-    ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
-    // 是否是原生标签 div,p...
+    ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag) // namespace
+    // 原生标签 div,p...
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       if (process.env.NODE_ENV !== 'production' && isDef(data) && isDef(data.nativeOn)) {
@@ -106,12 +107,13 @@ export function _createElement (
           context
         )
       }
+      // 核心创建vnode
       vnode = new VNode(
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
       )
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
-      // component
+      // 组件选项components已经定义
       // 自定义组件的创建在这里
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
