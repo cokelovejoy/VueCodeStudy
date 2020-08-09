@@ -36,12 +36,12 @@ const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 // 判断是同一个vnode节点
 function sameVnode (a, b) {
   return (
-    a.key === b.key && (
+    a.key === b.key && ( // 如果key相同
       (
-        a.tag === b.tag &&
-        a.isComment === b.isComment &&
-        isDef(a.data) === isDef(b.data) &&
-        sameInputType(a, b)
+        a.tag === b.tag && // 如果标签名相同
+        a.isComment === b.isComment && // 是否为注释节点
+        isDef(a.data) === isDef(b.data) && // 是否都定义了data，data包含了一些具体信息
+        sameInputType(a, b) // 当标签是input的时候，type必须相同。
       ) || (
         isTrue(a.isAsyncPlaceholder) &&
         a.asyncFactory === b.asyncFactory &&
@@ -212,7 +212,7 @@ export function createPatchFunction (backend) {
       insert(parentElm, vnode.elm, refElm)
     }
   }
-  // 创建子组件
+  // 创建子组件,将vnode转换为真实DOM
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
     let i = vnode.data
     if (isDef(i)) {
@@ -412,7 +412,7 @@ export function createPatchFunction (backend) {
       removeNode(vnode.elm)
     }
   }
-  // 更新子孩子
+  // 核心更新子孩子
   function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
     let oldStartIdx = 0
     let newStartIdx = 0
@@ -433,11 +433,14 @@ export function createPatchFunction (backend) {
       checkDuplicateKeys(newCh)
     }
     // 循环开始 比较 新老节点
+    // 循环条件：开始索引不能大于结束索引
     while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+      // 头尾指针调整
       if (isUndef(oldStartVnode)) {
         oldStartVnode = oldCh[++oldStartIdx] // Vnode has been moved left
       } else if (isUndef(oldEndVnode)) {
         oldEndVnode = oldCh[--oldEndIdx]
+        // 接下来是头尾比较4种情况
       } else if (sameVnode(oldStartVnode, newStartVnode)) {
         patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
         oldStartVnode = oldCh[++oldStartIdx]
@@ -457,16 +460,18 @@ export function createPatchFunction (backend) {
         oldEndVnode = oldCh[--oldEndIdx]
         newStartVnode = newCh[++newStartIdx]
       } else {
-        // 首尾相同的假设不成立,老老实实的循环比较
+        // 4中猜想之后，首尾相同的假设不成立,老老实实的循环比较
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
+        // 查找在老的孩子数组中的索引
         idxInOld = isDef(newStartVnode.key)
           ? oldKeyToIdx[newStartVnode.key]
           : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx)
         if (isUndef(idxInOld)) { // New element
+          // 没有找到则创建新元素
           createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx)
         } else {
+          // 找到了打补丁，还要移动到队首
           vnodeToMove = oldCh[idxInOld]
-          // 相同节点
           if (sameVnode(vnodeToMove, newStartVnode)) {
             patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
             oldCh[idxInOld] = undefined
@@ -480,13 +485,14 @@ export function createPatchFunction (backend) {
         newStartVnode = newCh[++newStartIdx]
       }
     }
+    // 整理工作：必定有数组还剩下 的元素没有处理
     // 循环结束
     if (oldStartIdx > oldEndIdx) {
-      // 老数组先结束,批量新增
+      // 老数组结束,这种情况说明新的数组里还有剩下的节点。批量新增
       refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm
       addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue)
     } else if (newStartIdx > newEndIdx) {
-      // 新数组先结束, 批量删除
+      // 新数组先结束,此时删除老数组中剩下的即可，批量删除
       removeVnodes(oldCh, oldStartIdx, oldEndIdx)
     }
   }

@@ -36,6 +36,7 @@ export function initMixin (Vue: Class<Component>) {
     // 如果是 组件实例Vue component，options中就会有_isComponent属性
     // 初始化内部组件, 对组件的options做处理
     if (options && options._isComponent) {
+      // 创建的是vue组件时进入这个if
       // optimize internal component instantiation (优化内部组件实例化)
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment. (由于动态选项合并很慢,而且内部组件选项不需要特别处理)

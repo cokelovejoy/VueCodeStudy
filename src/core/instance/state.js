@@ -118,9 +118,11 @@ function initData (vm: Component) {
   // typeof data is a function
   // go to getData() function , get data object { xx: "" } 
   let data = vm.$options.data
-  // 调用getData()之后就会返回 {xxx: ""}
+  // 如果data选项是函数，则执行它，并将其结果作为data选项。
+  // vue组件只能通过函数的方式，获取data对象。
+  // vue根实例的data选项可以是函数也可以是直接以对象形式传入
   data = vm._data = typeof data === 'function'
-    ? getData(data, vm)
+    ? getData(data, vm) // 调用getData()之后就会返回 {xxx: ""}
     : data || {}
   if (!isPlainObject(data)) {
     data = {}
@@ -166,7 +168,7 @@ export function getData (data: Function, vm: Component): any {
   try {
     // vm.$options.data 就是 mergedInstanceDataFn()方法, 调用这个方法, this指向vm, 参数vm
     // 调用之后的结果就是 data 对象, 然后返回 {xxx: ""}
-    return data.call(vm, vm)
+    return data.call(vm, vm) // 调用data函数获取返回的对象。
   } catch (e) {
     handleError(e, vm, `data()`)
     return {}

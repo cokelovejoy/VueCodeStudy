@@ -7,6 +7,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
   /**
    * Create asset registration methods.
    */
+  // Vue.component = function() {}
   ASSET_TYPES.forEach(type => {
     Vue[type] = function (
       id: string,
@@ -20,11 +21,15 @@ export function initAssetRegisters (Vue: GlobalAPI) {
         if (process.env.NODE_ENV !== 'production' && type === 'component') {
           validateComponentName(id)
         }
+
+        // definition是对象
         if (type === 'component' && isPlainObject(definition)) {
+          // 定义组件name
           definition.name = definition.name || id
           // 组件的构造函数创建 得到VueComponent的构造函数
           definition = this.options._base.extend(definition)
         }
+        // 
         if (type === 'directive' && typeof definition === 'function') {
           definition = { bind: definition, update: definition }
         }
