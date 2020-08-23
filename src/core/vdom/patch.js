@@ -460,7 +460,7 @@ export function createPatchFunction (backend) {
         oldEndVnode = oldCh[--oldEndIdx]
         newStartVnode = newCh[++newStartIdx]
       } else {
-        // 4中猜想之后，首尾相同的假设不成立,老老实实的循环比较
+        // 4种猜想之后，首尾相同的假设不成立,老老实实的循环比较
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
         // 查找在老的孩子数组中的索引
         idxInOld = isDef(newStartVnode.key)
